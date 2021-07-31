@@ -1,4 +1,4 @@
-// GENERATED AUTOMATICALLY FROM 'Assets/Settings/InputActions.inputactions'
+// GENERATED AUTOMATICALLY FROM 'Assets/Settings/Input/InputActions.inputactions'
 
 using System;
 using System.Collections;
@@ -23,6 +23,14 @@ public class @InputActions : IInputActionCollection, IDisposable
                     ""type"": ""Value"",
                     ""id"": ""2fb52056-bda4-47ea-bf81-f1e14722af1d"",
                     ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""Fire"",
+                    ""type"": ""Button"",
+                    ""id"": ""204f16d4-98b0-403d-803f-85b514f9630c"",
+                    ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """"
                 }
@@ -159,15 +167,60 @@ public class @InputActions : IInputActionCollection, IDisposable
                     ""action"": ""Move"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""9112dcc3-f613-41b3-a259-016d83fc495c"",
+                    ""path"": ""<Gamepad>/rightTrigger"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Fire"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4f89e5f8-66a2-4972-aae8-664c989bdbe7"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Fire"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
     ],
-    ""controlSchemes"": []
+    ""controlSchemes"": [
+        {
+            ""name"": ""PC_Android"",
+            ""bindingGroup"": ""PC_Android"",
+            ""devices"": [
+                {
+                    ""devicePath"": ""<Keyboard>"",
+                    ""isOptional"": false,
+                    ""isOR"": false
+                },
+                {
+                    ""devicePath"": ""<Mouse>"",
+                    ""isOptional"": false,
+                    ""isOR"": false
+                },
+                {
+                    ""devicePath"": ""<AndroidGamepad>"",
+                    ""isOptional"": false,
+                    ""isOR"": false
+                }
+            ]
+        }
+    ]
 }");
         // PlayerControlMap
         m_PlayerControlMap = asset.FindActionMap("PlayerControlMap", throwIfNotFound: true);
         m_PlayerControlMap_Move = m_PlayerControlMap.FindAction("Move", throwIfNotFound: true);
+        m_PlayerControlMap_Fire = m_PlayerControlMap.FindAction("Fire", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -218,11 +271,13 @@ public class @InputActions : IInputActionCollection, IDisposable
     private readonly InputActionMap m_PlayerControlMap;
     private IPlayerControlMapActions m_PlayerControlMapActionsCallbackInterface;
     private readonly InputAction m_PlayerControlMap_Move;
+    private readonly InputAction m_PlayerControlMap_Fire;
     public struct PlayerControlMapActions
     {
         private @InputActions m_Wrapper;
         public PlayerControlMapActions(@InputActions wrapper) { m_Wrapper = wrapper; }
         public InputAction @Move => m_Wrapper.m_PlayerControlMap_Move;
+        public InputAction @Fire => m_Wrapper.m_PlayerControlMap_Fire;
         public InputActionMap Get() { return m_Wrapper.m_PlayerControlMap; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -235,6 +290,9 @@ public class @InputActions : IInputActionCollection, IDisposable
                 @Move.started -= m_Wrapper.m_PlayerControlMapActionsCallbackInterface.OnMove;
                 @Move.performed -= m_Wrapper.m_PlayerControlMapActionsCallbackInterface.OnMove;
                 @Move.canceled -= m_Wrapper.m_PlayerControlMapActionsCallbackInterface.OnMove;
+                @Fire.started -= m_Wrapper.m_PlayerControlMapActionsCallbackInterface.OnFire;
+                @Fire.performed -= m_Wrapper.m_PlayerControlMapActionsCallbackInterface.OnFire;
+                @Fire.canceled -= m_Wrapper.m_PlayerControlMapActionsCallbackInterface.OnFire;
             }
             m_Wrapper.m_PlayerControlMapActionsCallbackInterface = instance;
             if (instance != null)
@@ -242,12 +300,25 @@ public class @InputActions : IInputActionCollection, IDisposable
                 @Move.started += instance.OnMove;
                 @Move.performed += instance.OnMove;
                 @Move.canceled += instance.OnMove;
+                @Fire.started += instance.OnFire;
+                @Fire.performed += instance.OnFire;
+                @Fire.canceled += instance.OnFire;
             }
         }
     }
     public PlayerControlMapActions @PlayerControlMap => new PlayerControlMapActions(this);
+    private int m_PC_AndroidSchemeIndex = -1;
+    public InputControlScheme PC_AndroidScheme
+    {
+        get
+        {
+            if (m_PC_AndroidSchemeIndex == -1) m_PC_AndroidSchemeIndex = asset.FindControlSchemeIndex("PC_Android");
+            return asset.controlSchemes[m_PC_AndroidSchemeIndex];
+        }
+    }
     public interface IPlayerControlMapActions
     {
         void OnMove(InputAction.CallbackContext context);
+        void OnFire(InputAction.CallbackContext context);
     }
 }

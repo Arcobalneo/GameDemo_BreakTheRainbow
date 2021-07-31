@@ -9,6 +9,10 @@ public class PlayerInput : ScriptableObject,InputActions.IPlayerControlMapAction
 {
     public event UnityAction<Vector2> onMove;
     public event UnityAction onStopMove;
+
+    public event UnityAction onFire;
+    public event UnityAction onStopFire;
+
     InputActions inputActions;
 
     private void OnEnable()
@@ -30,8 +34,8 @@ public class PlayerInput : ScriptableObject,InputActions.IPlayerControlMapAction
     {
         inputActions.PlayerControlMap.Enable();
 
-        Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked;
+        //Cursor.visible = false;
+        //Cursor.lockState = CursorLockMode.Locked;
     }
 
     public void OnMove(InputAction.CallbackContext context)
@@ -47,7 +51,16 @@ public class PlayerInput : ScriptableObject,InputActions.IPlayerControlMapAction
         }
     }
 
-    
+    public void OnFire(InputAction.CallbackContext context)
+    {
+        if (context.phase == InputActionPhase.Performed) // Performed:输入动作已执行
+        {
+            onFire?.Invoke();
+        }
 
-    
+        if (context.phase == InputActionPhase.Canceled) // Canceled:输入动作执行结束
+        {
+            onStopFire?.Invoke();
+        }
+    }
 }
