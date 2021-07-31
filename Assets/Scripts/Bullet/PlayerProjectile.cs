@@ -11,7 +11,7 @@ public class PlayerProjectile : Projectile
         trail = GetComponentInChildren<TrailRenderer>();
         if (moveDirection != Vector2.right) // 玩家子弹强制向右
         {
-            transform.rotation = Quaternion.FromToRotation(Vector2.right, moveDirection);
+            transform.GetChild(0).rotation = Quaternion.FromToRotation(Vector2.right, moveDirection);
         }
     }
 

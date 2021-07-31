@@ -40,12 +40,12 @@ public class PlayerInput : ScriptableObject,InputActions.IPlayerControlMapAction
 
     public void OnMove(InputAction.CallbackContext context)
     {
-        if(context.phase == InputActionPhase.Performed) // Performed:输入动作已执行
+        if(context.performed) // Performed:输入动作已执行
         {
             onMove?.Invoke(context.ReadValue<Vector2>());
         }
 
-        if(context.phase == InputActionPhase.Canceled) // Canceled:输入动作执行结束
+        if(context.canceled) // Canceled:输入动作执行结束
         {
             onStopMove?.Invoke();
         }
@@ -53,12 +53,12 @@ public class PlayerInput : ScriptableObject,InputActions.IPlayerControlMapAction
 
     public void OnFire(InputAction.CallbackContext context)
     {
-        if (context.phase == InputActionPhase.Performed) // Performed:输入动作已执行
+        if (context.performed) // Performed:输入动作已执行
         {
             onFire?.Invoke();
         }
 
-        if (context.phase == InputActionPhase.Canceled) // Canceled:输入动作执行结束
+        if (context.canceled) // Canceled:输入动作执行结束
         {
             onStopFire?.Invoke();
         }

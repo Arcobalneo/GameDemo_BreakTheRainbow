@@ -4,18 +4,23 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class Player : MonoBehaviour
+public class Player : Character
 {
-    [SerializeField] PlayerInput playerInput;
-    [SerializeField] float moveSpeed = 5f;
+    [Header("--- HP Status ---")]
+    [SerializeField] bool isRecoverHP = true;
+    [SerializeField] float hpRecoverTime;
+    [SerializeField, Range(0f, 1f)] float hpRecoverPercent;
+    WaitForSeconds waitHpRecoverCd;
 
+    [Header("--- Move ---")]
+    [SerializeField] float moveSpeed = 5f;
     [SerializeField] float speedUpTime = 0.2f;
     [SerializeField] float speedSlowTime = 0.15f;
-
     [SerializeField] float offsetX = 1f;
     [SerializeField] float offsetY = 0.4f;
     [SerializeField] float moveRotationAngle = 30f;
 
+    [Header("--- Fire ---")]
     [SerializeField] GameObject projectile_mid;
     [SerializeField] GameObject projectile_up;
     [SerializeField] GameObject projectile_down;
@@ -26,16 +31,20 @@ public class Player : MonoBehaviour
     [SerializeField] float fireCd = 0.2f;
     WaitForSeconds waitForFireCd;
 
+    [SerializeField] PlayerInput playerInput;
     Rigidbody2D rbody;
-    Coroutine moveCoroutine;
+    Coroutine moveCoroutine; // 禁用带参协程需要用变量先保存
+    Coroutine hpRecoverCoroutine;
 
     private void Awake()
     {
         rbody = GetComponent<Rigidbody2D>();
     }
 
-    private void OnEnable()
+    protected override void OnEnable()
     {
+        base.OnEnable();
+
         playerInput.onMove += Move;
         playerInput.onStopMove += StopMove;
         playerInput.onFire += Fire;
@@ -46,7 +55,9 @@ public class Player : MonoBehaviour
     {
         rbody.gravityScale = 0f;
         waitForFireCd = new WaitForSeconds(fireCd);
+        waitHpRecoverCd = new WaitForSeconds(hpRecoverTime);
         playerInput.EnablePlayerControlMap();
+
     }
 
     private void OnDisable()
@@ -89,7 +100,7 @@ public class Player : MonoBehaviour
         float t = 0f;
         while (t < calcuTime)
         {
-            t += Time.fixedDeltaTime / calcuTime;
+            t += Time.fixedDeltaTime;
             rbody.velocity = Vector2.Lerp(rbody.velocity, objVelocity, t / calcuTime);
             transform.rotation = Quaternion.Lerp(transform.rotation, moveRotation, t / calcuTime);
             yield return null;
@@ -158,4 +169,21 @@ public class Player : MonoBehaviour
         }
     }
     #endregion
+
+    public override void TakeDamage(float damage)
+    {
+        base.TakeDamage(damage);
+
+        if (gameObject.activeSelf)
+        {
+            if (isRecoverHP)
+            {
+                if(hpRecoverCoroutine != null)
+                {
+                    StopCoroutine(hpRecoverCoroutine);
+                }
+                hpRecoverCoroutine = StartCoroutine(HealthRecoverCoroutine(waitHpRecoverCd, hpRecoverPercent));
+            }
+        }
+    }
 }
