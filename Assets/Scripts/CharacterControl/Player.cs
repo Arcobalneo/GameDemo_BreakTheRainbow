@@ -6,10 +6,11 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D))]
 public class Player : Character
 {
-    [Header("--- HP Status ---")]
+    [Header("--- HP ---")]
     [SerializeField] bool isRecoverHP = true;
     [SerializeField] float hpRecoverTime;
     [SerializeField, Range(0f, 1f)] float hpRecoverPercent;
+    [SerializeField] StatsBar_HUD statsBar_HUD;
     WaitForSeconds waitHpRecoverCd;
 
     [Header("--- Move ---")]
@@ -20,7 +21,7 @@ public class Player : Character
     [SerializeField] float offsetY = 0.4f;
     [SerializeField] float moveRotationAngle = 30f;
 
-    [Header("--- Fire ---")]
+    [Header("--- Battle ---")]
     [SerializeField] GameObject projectile_mid;
     [SerializeField] GameObject projectile_up;
     [SerializeField] GameObject projectile_down;
@@ -29,6 +30,14 @@ public class Player : Character
     [SerializeField] Transform muzzleUp;
     [SerializeField] Transform muzzleDown;
     [SerializeField] float fireCd = 0.2f;
+    [SerializeField, Range(0, 100)] int dodgeEnergyCost = 25;
+    [SerializeField] float maxRoll = 720;
+    [SerializeField] float rollSpeed = 360f;
+    float curRoll;
+    float dodgeDuration;
+    Vector3 dodgeScale = new Vector3(0.65f, 0.65f, 0.65f);
+    bool isDodgeing = false;
+    Collider2D playerCollider;
     WaitForSeconds waitForFireCd;
 
     [SerializeField] PlayerInput playerInput;
@@ -39,6 +48,7 @@ public class Player : Character
     private void Awake()
     {
         rbody = GetComponent<Rigidbody2D>();
+        playerCollider = GetComponent<Collider2D>();
     }
 
     protected override void OnEnable()
@@ -49,15 +59,17 @@ public class Player : Character
         playerInput.onStopMove += StopMove;
         playerInput.onFire += Fire;
         playerInput.onStopFire += StopFire;
+        playerInput.onDodge += Dodge;
     }
 
     void Start()
     {
         rbody.gravityScale = 0f;
+        dodgeDuration = maxRoll / rollSpeed;
         waitForFireCd = new WaitForSeconds(fireCd);
         waitHpRecoverCd = new WaitForSeconds(hpRecoverTime);
         playerInput.EnablePlayerControlMap();
-
+        statsBar_HUD.Init(curHealth, maxHealth);
     }
 
     private void OnDisable()
@@ -66,6 +78,7 @@ public class Player : Character
         playerInput.onStopMove -= StopMove;
         playerInput.onFire -= Fire;
         playerInput.onStopFire -= StopFire;
+        playerInput.onDodge -= Dodge;
     }
 
 
@@ -110,7 +123,7 @@ public class Player : Character
 
     #endregion
 
-    #region fire
+    #region Battle
     private void Fire()
     {
         StartCoroutine(nameof(FireCoroutine));
@@ -168,17 +181,71 @@ public class Player : Character
             yield return waitForFireCd;
         }
     }
+
+    void Dodge()
+    {
+        if (isDodgeing || !PlayerEnergy.Instance.IsEnough(dodgeEnergyCost)) return;
+        StartCoroutine(nameof(DodgeCoroutine));
+    }
+
+    IEnumerator DodgeCoroutine()
+    {
+        isDodgeing = true;
+        PlayerEnergy.Instance.UseEnergy(dodgeEnergyCost); //消耗能量
+
+        playerCollider.isTrigger = true; // 变为无敌
+        curRoll = 0f;
+        var scale = transform.localScale;
+        var t1 = 0f;
+        var t2 = 0f;
+        while (curRoll < maxRoll)
+        {
+            curRoll += rollSpeed * Time.deltaTime;
+            transform.rotation = Quaternion.AngleAxis(curRoll, Vector3.right);
+
+            if(curRoll < maxRoll / 2) // 三维插值实现缩放
+            {
+                t1 += Time.deltaTime / dodgeDuration;
+                transform.localScale = Vector3.Lerp(transform.localScale, dodgeScale, t1);
+            }
+            else
+            {
+                t2 += Time.deltaTime / dodgeDuration;
+                transform.localScale = Vector3.Lerp(transform.localScale, Vector3.one, t2);
+            }
+
+            //if(curRoll < maxRoll / 2) // 直接计算实现缩放
+            //{
+            //    scale.x = Mathf.Clamp(scale.x - Time.deltaTime / dodgeDuration, dodgeScale.x, 1f);
+            //    scale.y = Mathf.Clamp(scale.y - Time.deltaTime / dodgeDuration, dodgeScale.y, 1f);
+            //    scale.z = Mathf.Clamp(scale.z - Time.deltaTime / dodgeDuration, dodgeScale.z, 1f);
+            //}
+            //else
+            //{
+            //    scale.x = Mathf.Clamp(scale.x + Time.deltaTime / dodgeDuration, dodgeScale.x, 1f);
+            //    scale.y = Mathf.Clamp(scale.y + Time.deltaTime / dodgeDuration, dodgeScale.y, 1f);
+            //    scale.z = Mathf.Clamp(scale.z + Time.deltaTime / dodgeDuration, dodgeScale.z, 1f);
+            //}
+            //transform.localScale = scale;
+            yield return null;
+        }
+
+        isDodgeing = false;
+        playerCollider.isTrigger = false;
+    }
     #endregion
 
+    #region HP
     public override void TakeDamage(float damage)
     {
         base.TakeDamage(damage);
+        statsBar_HUD.UpdateState(curHealth, maxHealth);
 
         if (gameObject.activeSelf)
         {
             if (isRecoverHP)
             {
-                if(hpRecoverCoroutine != null)
+                if (hpRecoverCoroutine != null)
                 {
                     StopCoroutine(hpRecoverCoroutine);
                 }
@@ -186,4 +253,19 @@ public class Player : Character
             }
         }
     }
+
+    public override void RecoverHealth(float value)
+    {
+        base.RecoverHealth(value);
+        statsBar_HUD.UpdateState(curHealth, maxHealth);
+    }
+
+    public override void Die()
+    {
+        statsBar_HUD.UpdateState(0f, maxHealth);
+        base.Die();
+    }
+    #endregion
+
+
 }

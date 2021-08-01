@@ -128,7 +128,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   destoryGameObj: 0
-  lifeTime: 3
+  lifeTime: 2
 --- !u!114 &7408388247019811976
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -142,7 +142,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hitVFX: {fileID: 4801493125213720806, guid: 94d3dff6247d98e4cb4d8d6f0be5e291, type: 3}
-  damage: 1
+  damage: 12
   moveSpeed: 8
   moveDirection: {x: -1, y: 0}
 --- !u!61 &5889750487786532455

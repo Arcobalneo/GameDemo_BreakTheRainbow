@@ -33,6 +33,14 @@ public class @InputActions : IInputActionCollection, IDisposable
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """"
+                },
+                {
+                    ""name"": ""Dodge"",
+                    ""type"": ""Button"",
+                    ""id"": ""468368d9-7e26-4a6a-bf88-d6cfd7b21fa6"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
                 }
             ],
             ""bindings"": [
@@ -189,6 +197,28 @@ public class @InputActions : IInputActionCollection, IDisposable
                     ""action"": ""Fire"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""bda8e220-67d0-4ed5-bcd1-aa2e79f02bf9"",
+                    ""path"": ""<Keyboard>/leftShift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""PC_Android"",
+                    ""action"": ""Dodge"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""ecbdffab-d9ba-4633-ae89-fb1d0d8d8ea8"",
+                    ""path"": ""<Gamepad>/rightShoulder"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""PC_Android"",
+                    ""action"": ""Dodge"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -221,6 +251,7 @@ public class @InputActions : IInputActionCollection, IDisposable
         m_PlayerControlMap = asset.FindActionMap("PlayerControlMap", throwIfNotFound: true);
         m_PlayerControlMap_Move = m_PlayerControlMap.FindAction("Move", throwIfNotFound: true);
         m_PlayerControlMap_Fire = m_PlayerControlMap.FindAction("Fire", throwIfNotFound: true);
+        m_PlayerControlMap_Dodge = m_PlayerControlMap.FindAction("Dodge", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -272,12 +303,14 @@ public class @InputActions : IInputActionCollection, IDisposable
     private IPlayerControlMapActions m_PlayerControlMapActionsCallbackInterface;
     private readonly InputAction m_PlayerControlMap_Move;
     private readonly InputAction m_PlayerControlMap_Fire;
+    private readonly InputAction m_PlayerControlMap_Dodge;
     public struct PlayerControlMapActions
     {
         private @InputActions m_Wrapper;
         public PlayerControlMapActions(@InputActions wrapper) { m_Wrapper = wrapper; }
         public InputAction @Move => m_Wrapper.m_PlayerControlMap_Move;
         public InputAction @Fire => m_Wrapper.m_PlayerControlMap_Fire;
+        public InputAction @Dodge => m_Wrapper.m_PlayerControlMap_Dodge;
         public InputActionMap Get() { return m_Wrapper.m_PlayerControlMap; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -293,6 +326,9 @@ public class @InputActions : IInputActionCollection, IDisposable
                 @Fire.started -= m_Wrapper.m_PlayerControlMapActionsCallbackInterface.OnFire;
                 @Fire.performed -= m_Wrapper.m_PlayerControlMapActionsCallbackInterface.OnFire;
                 @Fire.canceled -= m_Wrapper.m_PlayerControlMapActionsCallbackInterface.OnFire;
+                @Dodge.started -= m_Wrapper.m_PlayerControlMapActionsCallbackInterface.OnDodge;
+                @Dodge.performed -= m_Wrapper.m_PlayerControlMapActionsCallbackInterface.OnDodge;
+                @Dodge.canceled -= m_Wrapper.m_PlayerControlMapActionsCallbackInterface.OnDodge;
             }
             m_Wrapper.m_PlayerControlMapActionsCallbackInterface = instance;
             if (instance != null)
@@ -303,6 +339,9 @@ public class @InputActions : IInputActionCollection, IDisposable
                 @Fire.started += instance.OnFire;
                 @Fire.performed += instance.OnFire;
                 @Fire.canceled += instance.OnFire;
+                @Dodge.started += instance.OnDodge;
+                @Dodge.performed += instance.OnDodge;
+                @Dodge.canceled += instance.OnDodge;
             }
         }
     }
@@ -320,5 +359,6 @@ public class @InputActions : IInputActionCollection, IDisposable
     {
         void OnMove(InputAction.CallbackContext context);
         void OnFire(InputAction.CallbackContext context);
+        void OnDodge(InputAction.CallbackContext context);
     }
 }

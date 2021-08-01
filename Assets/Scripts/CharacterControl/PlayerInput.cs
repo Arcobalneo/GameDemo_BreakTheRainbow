@@ -12,6 +12,7 @@ public class PlayerInput : ScriptableObject,InputActions.IPlayerControlMapAction
 
     public event UnityAction onFire;
     public event UnityAction onStopFire;
+    public event UnityAction onDodge;
 
     InputActions inputActions;
 
@@ -61,6 +62,14 @@ public class PlayerInput : ScriptableObject,InputActions.IPlayerControlMapAction
         if (context.canceled) // Canceled:输入动作执行结束
         {
             onStopFire?.Invoke();
+        }
+    }
+
+    public void OnDodge(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            onDodge?.Invoke();
         }
     }
 }

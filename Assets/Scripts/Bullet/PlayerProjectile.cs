@@ -20,4 +20,9 @@ public class PlayerProjectile : Projectile
         trail.Clear(); // 修复对象池模式中子弹轨迹异常问题
     }
 
+    protected override void OnCollisionEnter2D(Collision2D collision)
+    {
+        base.OnCollisionEnter2D(collision);
+        PlayerEnergy.Instance.ObtainEnergy(PlayerEnergy.MAX_PERCENT);
+    }
 }
