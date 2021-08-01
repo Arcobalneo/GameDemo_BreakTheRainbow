@@ -43,6 +43,8 @@ public class PlayerInput : ScriptableObject,InputActions.IPlayerControlMapAction
     {
         if(context.performed) // Performed:输入动作已执行
         {
+            // 由于虚拟摇杆存在上下翻转问题，暂时只能这样修改输入
+            //onMove?.Invoke(new Vector2(context.ReadValue<Vector2>().x, context.ReadValue<Vector2>().y * -1f));
             onMove?.Invoke(context.ReadValue<Vector2>());
         }
 
